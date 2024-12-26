@@ -1,11 +1,7 @@
-# Dockerfile
 FROM openjdk:17-jdk-slim
 
-# Установка рабочей директории
-WORKDIR /app
+WORKDIR /appы
 
-# Копирование JAR-файла
-COPY out/artifacts/app_jar/app.jar app.jar
+COPY target/app-0.0.1-SNAPSHOT.jar app-0.0.1-SNAPSHOT.jar
 
-# Запуск приложения
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app-0.0.1-SNAPSHOT.jar"]
