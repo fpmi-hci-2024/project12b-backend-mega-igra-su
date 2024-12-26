@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -90,6 +91,49 @@ public class ClientController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+
+    @Operation(summary = "Get all games in the client's cart", description = "Retrieve a list of all games currently in the specified client's cart.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Games retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Game.class))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
+    @GetMapping("/{clientId}/cart")
+    public ResponseEntity<List<Game>> getGamesInCart(@PathVariable Long clientId) {
+        Optional<Client> clientOptional = clientRepository.findById(clientId);
+
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = clientOptional.get();
+        List<Game> cartGames = client.getCartGames();
+
+        return ResponseEntity.ok(cartGames);
+    }
+
+    @Operation(summary = "Get all purchased games of the client", description = "Retrieve a list of all games purchased by the specified client.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Games retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Game.class))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
+    @GetMapping("/{clientId}/purchased")
+    public ResponseEntity<List<Game>> getPurchasedGames(@PathVariable Long clientId) {
+        Optional<Client> clientOptional = clientRepository.findById(clientId);
+
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = clientOptional.get();
+        List<Game> purchasedGames = client.getPurchasedGames();
+
+        return ResponseEntity.ok(purchasedGames);
     }
 
 
@@ -254,5 +298,51 @@ public class ClientController {
 
         return ResponseEntity.ok().build();
     }
+
+
+
+    @Operation(summary = "Get client's balance", description = "Retrieve the current balance of the specified client.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Balance retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "100.0"))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
+    @GetMapping("/{clientId}/balance")
+    public ResponseEntity<Double> getClientBalance(@PathVariable Long clientId) {
+        Optional<Client> clientOptional = clientRepository.findById(clientId);
+
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = clientOptional.get();
+        return ResponseEntity.ok(client.getBalance());
+    }
+
+    @Operation(summary = "Get total cost of games in the client's cart", description = "Retrieve the total sum of all game costs in the specified client's cart.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Total cost retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "250.0"))),
+            @ApiResponse(responseCode = "404", description = "Client not found", content = @Content)
+    })
+
+
+
+    @GetMapping("/{clientId}/cart-total")
+    public ResponseEntity<Double> getCartTotal(@PathVariable Long clientId) {
+        Optional<Client> clientOptional = clientRepository.findById(clientId);
+
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = clientOptional.get();
+        double totalCost = client.getCartGames().stream().mapToDouble(Game::getCost).sum();
+
+        return ResponseEntity.ok(totalCost);
+    }
+
 }
 
